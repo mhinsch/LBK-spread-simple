@@ -142,6 +142,17 @@ function attempt_marriage!(person, world, pars)
 end
 
 
+function collect_candidates!(cand, hh, person, pars)
+	for p in hh.members
+		if p.sex != person.sex && p.age > pars.min_age_marry && 
+			!(p in person.children) && !(p in person.parents) && 
+			!(intersects(p.parents, person.parents)) && rand() pars.prob_candidate
+			push!(cand, p)
+		end
+	end
+end
+
+
 function marriage!(p1, p2, pars)
 	@assert p1.partner == p2.partner == nothing
 	
