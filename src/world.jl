@@ -4,7 +4,7 @@ const Pos = @NamedTuple{x::Int, y::Int}
 mutable struct Household{PERS}
 	home :: Pos
 	members :: Vector{PERS}
-	fields :: Vector{Pos}
+	fields :: Vector{Tuple{Pos, Float64}}
 end
 
 Household{P}(pos) where{P} = Household{P}(pos, P[], [])

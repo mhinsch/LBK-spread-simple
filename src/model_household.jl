@@ -7,6 +7,10 @@ function production!(household, world, pars)
 	if length(household.fields) < length(household.members)
 		try_gain_fields!(household, world, pars)
 	end
+	
+	if length(household.fields) > length(household.members)
+		lose_fields!(household, world, pars)
+	end
 
 	household.resources = 0
 	for pos in household.fields 
@@ -37,9 +41,22 @@ function try_gain_fields!(hh, world, pars)
 	n_needed = min(length(hh.members) - length(hh.fields), length(fields))
 	for i in 0:n_needed-1
 		f = fields[end-i]
-		push!(hh.fields, (x=f[1], y=f[2]))
+		push!(hh.fields, (x=f[1], y=f[2]), f[3])
 		world.owned[f[2], f[1]] = true
 	end
+	
+	nothing
+end
+
+
+function lose_fields!(hh, world, pars)
+	sort!(hh.fields, by = f->f[2], rev = true)
+	n = length(hh.fields) - length(hh.members)
+	for i in 1:n
+		world.owned[hh.fields[end].pos] = false
+		pop!(hh.fields)
+	end
+	
 	nothing
 end
 

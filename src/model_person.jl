@@ -146,7 +146,7 @@ function collect_candidates!(cand, hh, person, pars)
 	for p in hh.members
 		if p.sex != person.sex && p.age > pars.min_age_marry && 
 			!(p in person.children) && !(p in person.parents) && 
-			!(intersects(p.parents, person.parents)) && rand() pars.prob_candidate
+			!(intersects(p.parents, person.parents)) && rand() < pars.prob_candidate
 			push!(cand, p)
 		end
 	end
