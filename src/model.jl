@@ -52,3 +52,46 @@ function remove_all_dead!(pop)
 	end
 	nothing
 end		
+
+function move_to_household!(leavers, new_hh, world, pars)
+	for p in leavers
+		find_remove!(p.home.members, p)
+		p.pos = new_hh
+	end
+	append!(new_hh.members, leavers)
+	
+	try_gain_fields!(new_hh, world, pars)
+end	
+
+
+function provisioning!(household, pars)
+	household.resources -= length(household.members)
+	nothing
+end
+
+function person_updates!(person, world, pars)
+	inc_age!(person)
+	
+	if rand() < death_prob(person, pars)
+		die!(person, world, pars)
+		return
+	end
+	
+	if can_reproduce(person, pars) && rand() < repr_prob(person, pars)
+		reproduce!(person, person.partner, world, pars)
+	end
+	
+	if can_migrate(person, pars) && rand() < mig_prob(person, pars)
+		migrate!(person, world, pars)
+	end
+	
+	if want_to_marry(person, pars)
+		attempt_marriage(person, world, pars)
+	end
+	
+	nothing
+end
+
+
+inc_age!(person) = (person.age += 1)
+
