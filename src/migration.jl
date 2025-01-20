@@ -36,18 +36,14 @@ function search_point(pos, angle, world, pars)
 	
 	points = Vector{Tuple{Float64, Float64, Float64}}()
 	
-	bresenham_apply!(pos, end_point, size(world.quality)) begin p
-			q = world.quality[p]
-			# we don't want other hhs nearby, so quality is 0 if we find any
-			for hh in local_households(p, pars.min_hh_dist)
-				q = 0.0
-				break
-			end
-			if q > 0.0
-				push!(points, (p..., q))
-			end
-			nothing
+	bresenham_apply!(pos, end_point, size(world.quality)) do p
+		q = world.quality[p]
+		
+		if q > 0.0 && is_unoccupied(world, p, pars.min_hh_dist)
+			push!(points, (p..., q))
 		end
+		nothing
+	end
 	if isempty(points)
 		return (pos..., 0.0)
 	end

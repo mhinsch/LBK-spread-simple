@@ -31,7 +31,7 @@ function marriage!(p1, p2, pars)
 	p2.partner = p1
 	
 	move, stay = rand(0:1) ?
-		p1, p2 : p2, p1
+		(p1, p2) : (p2, p1)
 		
 	leavers = [move]
 	for child in leavers.children

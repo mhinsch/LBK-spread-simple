@@ -50,8 +50,8 @@ mutable struct World
 	quality :: Matrix{Float64}
 	owned :: Matrix{Bool}
 	weather :: Matrix{Float64}
+	hh_cache :: Matrix{Vector{Household{Person}}}
 	households :: Vector{Household{Person}}
-	hh_cache :: Matrix{Vector{Household{Person}}
 	pop :: Vector{Person}
 end
 
@@ -59,12 +59,15 @@ weather_at(x, y, world, pars) = world.weather[x÷pars.wth_zoom+1, y÷pars.wth_zo
 
 
 mutable struct HHCacheIter
-	cache :: Matrix{Vector{Household{Person}}
+	cache :: Matrix{Vector{Household{Person}}}
 	pos :: Pos
 	r2 :: Float64
-	top, left :: Int
-	xm, ym :: Int
-	i, j :: Int
+	top :: Int
+	left :: Int
+	xm :: Int
+	ym :: Int
+	i :: Int
+	j :: Int
 end
 
 # TODO change to Int pos
@@ -100,6 +103,15 @@ function local_households(world, pos, radius)
 end
 
 
+function is_unoccupied(world, pos, radius)
+	for hh in local_households(world, pos, radius)
+		return false
+	end
+	
+	true
+end
+
+
 function household_cog(world, pos, radius)
 	n = 0
 	cog = 0,0
@@ -110,3 +122,72 @@ function household_cog(world, pos, radius)
 	
 	cog ./ n
 end
+
+
+function weather!(world, pars)
+	rand!(world.weather, DiamondSquare(H=pars.wth_ruggedness))
+end
+
+
+function harvest(pos, world, pars)
+	world.lsc[pos] * weather_at(pos..., world, pars)
+end
+
+
+function add_to_world!(world, child)
+	push!(world.pop, child)
+end
+
+
+function remove_all_dead!(pop)
+	for i in length(pop):-1:1
+		if is_dead(pop[i])
+			pop[i] = pop[end]
+			pop!(pop)
+		end
+	end
+	nothing
+end		
+
+function move_to_household!(leavers, new_hh, world, pars)
+	for p in leavers
+		find_remove!(p.home.members, p)
+		p.pos = new_hh
+	end
+	append!(new_hh.members, leavers)
+	
+	try_gain_fields!(new_hh, world, pars)
+end	
+
+
+function provisioning!(household, pars)
+	household.resources -= length(household.members)
+	nothing
+end
+
+function person_updates!(person, world, pars)
+	inc_age!(person)
+	
+	if rand() < death_prob(person, pars)
+		die!(person, world, pars)
+		return
+	end
+	
+	if can_reproduce(person, pars) && rand() < repr_prob(person, pars)
+		reproduce!(person, person.partner, world, pars)
+	end
+	
+	if can_migrate(person, pars) && rand() < mig_prob(person, pars)
+		migrate!(person, world, pars)
+	end
+	
+	if want_to_marry(person, pars)
+		attempt_marriage(person, world, pars)
+	end
+	
+	nothing
+end
+
+
+inc_age!(person) = (person.age += 1)
+
