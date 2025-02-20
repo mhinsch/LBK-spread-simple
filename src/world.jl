@@ -1,15 +1,19 @@
-const Pos = @NamedTuple{x::Int, y::Int}
+const Pos = Tuple{Int, Int}
 
 
 mutable struct Household{PERS}
-	home :: Pos
+	pos :: Pos
 	members :: Vector{PERS}
 	fields :: Vector{Tuple{Pos, Float64}}
+	resources :: Float64
 end
 
-Household{P}(pos) where{P} = Household{P}(pos, P[], [])
+Household{P}(pos) where{P} = Household{P}(pos, P[], [], 0.0)
 
-add_to_household!(hh, person) = push!(hh.members, person)
+function add_to_household!(hh, person)
+	push!(hh.members, person)
+	person.home = hh
+end
 
 
 mutable struct Person
@@ -30,7 +34,7 @@ mutable struct Person
 end
 
 
-const UnknownHousehold = Household{Person}((0,0), [], [])
+const UnknownHousehold = Household{Person}((0,0))
 
 
 Person() = Person(UnknownHousehold, true, 0.0,
@@ -44,62 +48,30 @@ is_female(person) = person.sex
 
 is_dead(person) = person.age < 0
 
+is_single(person) = person.partner == nothing
+
 
 mutable struct World
 	lsc :: Matrix{Float64}
 	quality :: Matrix{Float64}
 	owned :: Matrix{Bool}
 	weather :: Matrix{Float64}
-	hh_cache :: Matrix{Vector{Household{Person}}}
+	hh_cache :: Cache2D{Household{Person}}
 	households :: Vector{Household{Person}}
 	pop :: Vector{Person}
 end
 
-weather_at(x, y, world, pars) = world.weather[x÷pars.wth_zoom+1, y÷pars.wth_zoom+1]
+weather_at(pos, world, pars) = world.weather[pos[1]÷pars.wth_zoom+1, pos[2]÷pars.wth_zoom+1]
 
 
-mutable struct HHCacheIter
-	cache :: Matrix{Vector{Household{Person}}}
-	pos :: Pos
-	r2 :: Float64
-	top :: Int
-	left :: Int
-	xm :: Int
-	ym :: Int
-	i :: Int
-	j :: Int
-end
-
-# TODO change to Int pos
-# TODO borders
-function iterate(hhci::HHCacheIter, dummy=hhci)
-	while true
-		y, x = hhci.top + hhci.i÷hhci.xm, hhci.left + hhci.i%hhci.xm
-		vec = hhci.cache[y, x]
-		if hhci.j <= length(vec)
-			el = vec[hhci.j]
-			hhci.j += 1
-			if sum((el.pos .- hhci.pos).^2) < hhci.r2
-				return el, hhci
-			end
-		else
-			hhci.i += 1
-			if i > xm * ym
-				return nothing
-			end
-			hhci.j = 1
-		end
-	end
+function add_household!(world, hh)
+	push!(world.households, hh)
+	add_to_cache!(world.hh_cache, hh, hh.pos)
 end
 
 
 function local_households(world, pos, radius)
-	HHCacheIter(world.hh_cache, pos, radius^2, 
-		max(0, floor(Int, pos[1]-radius)), 
-		max(0, floor(Int, pos[2]-radius)),
-		min(length(world.hh_cache)[2], ceil(Int, pos[1]+radius)), 
-		min(length(world.hh_cache)[1], ceil(Int, pos[2]+radius)),
-		0, 1)
+	iter_circle(world.hh_cache, pos, radius)
 end
 
 
@@ -114,13 +86,16 @@ end
 
 function household_cog(world, pos, radius)
 	n = 0
-	cog = 0,0
+	cogy, cogx = 0,0
 	for hh in local_households(world, pos, radius)
-		cog .+= hh.pos
+		cogy += hh.pos[1]
+		cogx += hh.pos[2]
 		n += 1
 	end
+
+	@assert n > 0
 	
-	cog ./ n
+	(cogy, cogx) ./ n
 end
 
 
@@ -130,7 +105,7 @@ end
 
 
 function harvest(pos, world, pars)
-	world.lsc[pos] * weather_at(pos..., world, pars)
+	world.lsc[pos...] * weather_at(pos, world, pars)
 end
 
 
@@ -151,8 +126,8 @@ end
 
 function move_to_household!(leavers, new_hh, world, pars)
 	for p in leavers
-		find_remove!(p.home.members, p)
-		p.pos = new_hh
+		remove_unsorted!(p.home.members, p)
+		p.home = new_hh
 	end
 	append!(new_hh.members, leavers)
 	
@@ -178,11 +153,12 @@ function person_updates!(person, world, pars)
 	end
 	
 	if can_migrate(person, pars) && rand() < mig_prob(person, pars)
+		print("m")
 		migrate!(person, world, pars)
 	end
 	
 	if want_to_marry(person, pars)
-		attempt_marriage(person, world, pars)
+		attempt_marriage!(person, world, pars)
 	end
 	
 	nothing
@@ -191,3 +167,39 @@ end
 
 inc_age!(person) = (person.age += 1)
 
+
+
+function check_consistency(world)
+	for x in 1:size(world.hh_cache.data)[2], y in 1:size(world.hh_cache.data)[1]
+		lhh = world.hh_cache.data[y, x]
+		for hh in lhh
+			@assert hh in world.households
+			@assert pos2cache_idx(world.hh_cache, hh.pos) == (y,x)
+
+			for m in hh.members
+				@assert m.home == hh
+			end
+		end
+	end
+
+	for hh in world.households
+		@assert hh in world.hh_cache.data[pos2cache_idx(world.hh_cache, hh.pos)...]
+	end
+
+	for p in world.pop
+		@assert !is_dead(p)
+		@assert p in p.home.members
+		if !is_single(p)
+			@assert p.home == p.partner.home
+			@assert p.partner.partner == p
+		end
+
+		for c in p.children
+			@assert p in c.parents
+		end
+
+		for a in p.parents
+			@assert p in a.children
+		end
+	end
+end

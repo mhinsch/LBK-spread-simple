@@ -32,12 +32,14 @@ function exchange_contacts!(self, world, pars)
 	# TODO maybe keep only remote contacts as optimisation
 	for p in self.members
 		for c in p.contacts
-			push!(contacts, c.home)
+			if !(c.home in contacts)
+				push!(contacts, c.home)
+			end
 		end
 	end
 	
-	sort!(contacts, by=objectid)
-	unique!(contacts)
+	#sort!(contacts, by=objectid)
+	#unique!(contacts)
 	
 	for hh in contacts
 		if hh == self || close_by(self, hh, pars.exch_radius)

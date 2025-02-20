@@ -5,5 +5,5 @@ include("analysis.jl")
 include("main.jl")
 
 if !isinteractive()
-    @time run(model, pars, log_freq, log_file)
+    @time run(model, log_freq)
 end

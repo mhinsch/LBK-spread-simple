@@ -14,13 +14,7 @@ include("setup.jl")
 using CompositeStructs
 
 
-mutable struct Model
-	world :: World
-	time :: Int
-end
-
-
-@composite @kwdef struct AllParams
+@composite @kwdef mutable struct AllParams
 	Params...
 	
 	seed :: Int = 42
@@ -28,17 +22,24 @@ end
 end
 
 
-function setup_model(pars)
-	world = setup_world(pars)
-	
-	Model(world, 0)
+mutable struct Model
+	world :: World
+	time :: Int
+	pars :: AllParams
 end
 
 
-function step!(model, pars)
+function setup_model(pars)
+	world = setup_world(pars)
 	
-	world = model.world
+	Model(world, 0, pars)
+end
 
+
+function step!(model)
+	world = model.world
+	pars = model.pars
+	
 	weather!(world, pars)
 	
 	shuffle!(world.households)
@@ -57,12 +58,17 @@ function step!(model, pars)
 	end
 	
 	shuffle!(world.pop)
-	# iterate in reverse so that births and deaths don't invalidate
-	for person in Iterators.reverse(world.pop)
+	# iterate in reverse so that newborns aren't processed immediately
+	for i in length(world.pop):-1:1
+		person = world.pop[i]
 		person_updates!(person, world, pars)
 	end
 	
 	remove_all_dead!(world.pop)
+
+	check_consistency(world)
+
+	println(rand(5))
 end
 
 

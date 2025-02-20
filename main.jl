@@ -8,20 +8,16 @@ function setup_logs(data_fname)
 end
 
 
-function run(model, pars, log_freq, log_file = nothing, ticker_file=stdout)
-    data = observe(Data, model.world, 0, pars)
-    for i in 1:pars.n_steps
-        step!(model, pars)
-        if model.time % pars.obs_freq == 0
-            data = observe(Data, model.world, i, pars)
-            if ticker_file != nothing
-                ticker(ticker_file, model, data)
-            end
+function run(model, log_freq, log_file = nothing, ticker_file=stdout)
+    data = observe(Data, model.world, 0, model.pars)
+    for i in 1:model.pars.n_steps
+        step!(model)
+        data = observe(Data, model.world, i, model.pars)
+        if ticker_file != nothing
+            ticker(ticker_file, model, data)
         end
-        if model.time % log_freq == 0
-            if log_file != nothing
-                log_results(log_file, data)
-            end
+        if log_file != nothing
+            log_results(log_file, data)
         end
     end
 end
@@ -37,6 +33,8 @@ const allpars, args = load_parameters(ARGS, AllParams, cmdl = (
 const pars = allpars[1]
 
 Random.seed!(pars.seed)
+
+println(rand(5))
 
 const model = setup_model(pars)
 const log_freq = args[:log_freq]
