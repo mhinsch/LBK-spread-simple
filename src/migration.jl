@@ -11,8 +11,6 @@ function migrate!(person, world, pars)
 		return
 	end
 
-	println("p: ", new_pos)
-	
 	move_or_create_household!(person, new_pos, world, pars)
 	nothing
 end
@@ -66,8 +64,6 @@ function search_point(pos, angle, world, pars)
 		return pos
 	end
 
-	println("ps: ", points)
-	
 	#return best point
 	points[findmax(p->p[2], points)[2]][1]
 end

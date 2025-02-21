@@ -53,4 +53,9 @@
 	ini_pop_size :: Int = 300
 	ini_n_hh :: Int = 4
 	ini_p_married :: Float64 = 0.75
+
+	ini_x_range :: Int = 30
+	ini_x_ctr :: Int = 513
+	ini_y_range :: Int = 30
+	ini_y_ctr :: Int = 513
 end

@@ -46,19 +46,20 @@ function run(model, gui, graphs, logfile)
 		else
 			t1 = time()
 			step!(model) # run internal scheduler up to the next time step
+			data = observe(Data, model.world, t, model.pars)
 		
 			# print all stats to file
 			#print_stats(logfile, model)
 			# this is suboptimal, as all these are calculated in print_stats as well
 			# solution forthcoming
-			add_value!(graphs[1], length(model.world.pop))
+			add_value!(graphs[1], data.N)
 			#add_value!(graphs[2], count(ag -> ag.status == infected, model.pop))
 			#add_value!(graphs[3], count(ag -> ag.status == immune, model.pop))
 			#add_value!(graphs[4], count(ag -> ag.status == dead, model.pop))
 
 			t += 1
 
-			println(t, " ", length(model.world.pop))
+			ticker(stdout, model, data)
 		end
 
 		event_ref = Ref{SDL_Event}()

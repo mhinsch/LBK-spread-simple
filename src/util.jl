@@ -9,7 +9,6 @@ function intersect(c1, c2)
 end
 
 
-
 function remove_unsorted!(cont, obj)
     for (i, el) in enumerate(cont)
         if el == obj
@@ -47,7 +46,11 @@ pos2cache_idx(cache, pos) = pos[1]÷cache.zoom + 1, pos[2]÷cache.zoom + 1
 function add_to_cache!(cache, item, pos)
 	push!(cache.data[pos2cache_idx(cache, pos)...], item)
 end
-	
+
+function remove_from_cache!(cache, item, pos)
+	remove_unsorted!(cache.data[pos2cache_idx(cache, pos)...], item)
+end
+
 
 mutable struct Cache2DIter{ELT}
 	cache :: Matrix{Vector{ELT}}

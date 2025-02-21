@@ -66,6 +66,8 @@ function step!(model)
 	
 	remove_all_dead!(world.pop)
 
+	remove_empty_households!(world, pars)
+
 	check_consistency(world)
 
 	println(rand(5))

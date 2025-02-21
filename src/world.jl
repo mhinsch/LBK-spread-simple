@@ -124,6 +124,21 @@ function remove_all_dead!(pop)
 	nothing
 end		
 
+
+function remove_empty_households!(world, pars)
+	for i in length(world.households):-1:1
+		hh = world.households[i]
+		isempty(hh.members) || continue
+
+		lose_fields!(hh, world, pars)
+		@assert isempty(hh.fields)
+
+		remove_unsorted_at!(world.households, i)
+		remove_from_cache!(world.hh_cache, hh, hh.pos)
+	end
+end
+
+
 function move_to_household!(leavers, new_hh, world, pars)
 	for p in leavers
 		remove_unsorted!(p.home.members, p)
@@ -153,7 +168,6 @@ function person_updates!(person, world, pars)
 	end
 	
 	if can_migrate(person, pars) && rand() < mig_prob(person, pars)
-		print("m")
 		migrate!(person, world, pars)
 	end
 	

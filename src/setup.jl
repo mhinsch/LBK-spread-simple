@@ -80,16 +80,20 @@ end
 
 
 function generate_households!(world, pars)	
-	y = size(world.lsc)[1]
-	
-	quals = [ (x, world.quality[y,x]) for x in 1:size(world.lsc)[2] ]
+	xrng = (pars.ini_x_ctr - pars.ini_x_range÷2):(pars.ini_x_ctr + pars.ini_x_range ÷ 2)
+	yrng = (pars.ini_y_ctr - pars.ini_y_range÷2):(pars.ini_y_ctr + pars.ini_y_range ÷ 2)
+
+	quals = Tuple{Pos, Float64}[]
+	for x in xrng, y in yrng
+		push!(quals, ((y,x), world.quality[y,x]))
+	end
 	sort!(quals, by=q->q[2])
 	
 	# TODO households, families
 	for hh in 1:pars.ini_n_hh
 		# find the first unoccupied field
 		for qi in length(quals):-1:1
-			if is_unoccupied(world, (y, quals[qi][1]), pars.min_hh_dist)
+			if is_unoccupied(world, quals[qi][1], pars.min_hh_dist)
 				break
 			end
 			pop!(quals)
@@ -97,7 +101,7 @@ function generate_households!(world, pars)
 		
 		length(quals) > 0 || error("no initial settlement possible") 
 			
-		add_household!(world, Household{eltype(world.pop)}((y, quals[end][1])))
+		add_household!(world, Household{eltype(world.pop)}(quals[end][1]))
 		pop!(quals)
 	end
 end
