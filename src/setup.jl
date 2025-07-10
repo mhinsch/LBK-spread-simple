@@ -78,10 +78,15 @@ function setup_population!(world, pars)
 		person.sex = rand(0:1)
 		# triangular age pyramid
 		person.age = min(rand() * 60, rand() * 60)
+
 		person.coop = rnd_in_range(pars.ini_coop)
 		person.dispersal = rnd_in_range(pars.ini_dispersal)
 		person.dens_dispersal = rnd_in_range(pars.ini_dens_dispersal)
 		person.culture = rand()
+
+		person.auto_genes =
+			BitVector(rand(Bool, pars.n_auto_genes)), BitVector(rand(Bool, pars.n_auto_genes))
+		person.sex_gene = BitVector(rand(Bool, pars.n_sex_genes))
 	end
 end		
 

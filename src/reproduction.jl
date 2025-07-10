@@ -7,10 +7,17 @@ repr_prob(person, pars) = pars.repr_prob
 function reproduce!(mother, father, world, pars)
 	@assert mother.home == father.home
 	
-	child = Person(mother.home, rand(0:1), 0.0, 
+	sex = rand((true, false))
+	
+	child = Person(mother.home, sex, 0.0, 
 		nothing, [mother, father], [], [mother, father],
-		mother.coop, mother.dispersal, mother.dens_dispersal, mother.culture)
-		
+		mother.coop, mother.dispersal, mother.dens_dispersal,
+		(copy(mother.auto_genes[rand(1:2)]), copy(father.auto_genes[rand(1:2)])),
+		(sex ? copy(mother.sex_gene) : copy(father.sex_gene)),
+		mother.culture)
+
+	mutate_genes!(child, pars)
+	
 	if rand() < pars.p_mut
 		mutate!(child, pars)
 	end
@@ -26,6 +33,48 @@ function reproduce!(mother, father, world, pars)
 	child
 end
 
+
+function crossover!(gene1, gene2, pars)
+	n_co = rand(Poisson(pars.rate_crossover))
+
+	if n_co < 1
+		return
+	end
+
+	co_sites = rand(1:length(gene1), n_co) |> sort! |> unique!
+
+	flip = rand((true, false))
+	c = 1
+
+	for i in 1:length(gene1)
+		if c <= length(co_sites) && co_sites[c] == i
+			flip = !flip
+			c += 1
+		end
+
+		if flip
+			gene1[i], gene2[i] = gene2[i], gene1[i]  
+		end
+	end
+
+	nothing
+end
+
+
+function mutate_genes!(child, pars)
+	crossover!(child.auto_genes..., pars)
+	
+	for c in 1:2, i in 1:pars.n_auto_mutate
+		chrom = child.auto_genes[c]
+		m = rand(1:length(chrom))
+		chrom[m] = !chrom[m]
+	end
+
+	for i in 1:pars.n_sex_mutate
+		m = rand(1:length(child.sex_gene))
+		child.sex_gene[m] = !child.sex_gene[m]
+	end
+end
 
 function mutate!(child, pars)
 	child.coop = limit(0.0, child.coop + rand(Normal(0.0, pars.d_mut)), 1.0)

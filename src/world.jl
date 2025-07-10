@@ -31,6 +31,10 @@ mutable struct Person
 	dispersal :: Float64
 	dens_dispersal :: Float64
 	
+	auto_genes :: Tuple{BitVector, BitVector}
+	sex_gene :: BitVector
+
+	
 	culture :: Float64
 end
 
@@ -41,6 +45,7 @@ const UnknownHousehold = Household{Person}((0,0))
 Person() = Person(UnknownHousehold, true, 0.0,
 	nothing, [], [], [],
 	0.0, 0.0, 0.0,
+	([], []), [],
 	0.0)
 	
 const UnknownPerson = Person()

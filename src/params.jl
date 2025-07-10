@@ -28,6 +28,13 @@
 	d_mut :: Float64 = 0.05
 	influence :: Float64 = 0.05
 	
+	n_auto_genes :: Int = 64
+	n_auto_mutate :: Int = 5
+	rate_crossover :: Float64 = 1.0
+	n_sex_genes :: Int = 64
+	n_sex_mutate :: Int = 5
+	
+	
 	"minimum age for reproduction"
 	min_repr_age :: Int = 16
 	"maximum age for reproduction"
