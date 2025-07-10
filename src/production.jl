@@ -1,3 +1,9 @@
+wth_min(pars) = pars.wth_mean - pars.wth_range/2
+
+function harvest(pos, world, pars)
+	w =  wth_min(pars) + weather_at(pos, world, pars) * pars.wth_range
+	world.lsc[pos...] * w
+end
 
 """
 Try to get one field per member; produce food.
@@ -11,7 +17,8 @@ function production!(household, world, pars)
 
 	household.resources = 0
 	for field in household.fields 
-		household.resources += harvest(field[1], world, pars)
+		household.resources += harvest(field[1], world, pars) * pars.yield
+		#print(household.resources, " ")
 	end
 	nothing
 end	

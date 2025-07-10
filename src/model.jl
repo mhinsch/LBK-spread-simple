@@ -8,6 +8,7 @@ include("death.jl")
 include("reproduction.jl")
 include("migration.jl")
 include("marriage.jl")
+include("culture.jl")
 include("setup.jl")
 
 
@@ -44,6 +45,11 @@ function step!(model)
 	
 	shuffle!(world.households)
 	for hh in world.households
+		culture!(hh, world, pars)
+	end
+	
+	shuffle!(world.households)
+	for hh in world.households
 		production!(hh, world, pars)
 	end
 	
@@ -70,7 +76,7 @@ function step!(model)
 
 	check_consistency(world)
 
-	println(rand(5))
+#	println(rand(5))
 end
 
 

@@ -1,3 +1,6 @@
+limit(mi, v, ma) = max(mi, min(ma, v))
+
+
 function intersect(c1, c2)
 	for c in c1
 		if c in c2

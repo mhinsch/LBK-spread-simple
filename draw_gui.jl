@@ -31,22 +31,29 @@ function draw_world(canvas, model)
 	pars = model.pars
 
 	lsc = world.lsc
+	weather = world.weather
 	zoomy = size(lsc)[1] / ys
 	zoomx = size(lsc)[2] / xs
 
 	for y in 1:size(lsc)[1], x in 1:size(lsc)[2]
 		p = floor.(Int, (y,x) ./ (zoomy, zoomx)) .+ (1,1)
 
-		col = rgb((1.0-lsc[y,x])*255, lsc[y,x]*255, 0)
+		q = limit(0.0, lsc[y,x], 1.0)
+
+		col = rgb(q*255, q*255, q*255)
 		put(canvas, p[2], p[1], col)
 	end
 
 	for hh in world.households
 		x, y = floor.(Int, (hh.pos[2]/zoomx, hh.pos[1]/zoomy))
-		circle_fill(canvas, x, y, 2, WHITE, true)
+		circle_fill(canvas, x, y, 2, rgb(200, 0, 0), true)
 		for f in hh.fields 
+			q = limit(0.0, harvest(f[1], world, pars), 1.0)
+			col = rgb((1-q)*255, q*255, 0)
 			xx, yy = floor.(Int, (f[1][2]/zoomx, f[1][1]/zoomy))
-			put(canvas, xx, yy, blue(floor(UInt32, 100*f[2] + 155)))
+			if 0<xx<=canvas.xsize && 0<yy<=canvas.ysize
+				put(canvas, xx, yy, col)
+			end
 		end
 	end
 end

@@ -1,5 +1,11 @@
 
-death_prob(person, pars) = pars.death_prob
+function death_prob(person, pars)
+	hh = person.home
+	prov = hh.resources < 0 ?
+		1.0 + hh.resources/length(hh.members) : 1.0
+	
+	1.0 - (1.0-pars.death_prob) * prov
+end
 
 
 function die!(person, world, pars)

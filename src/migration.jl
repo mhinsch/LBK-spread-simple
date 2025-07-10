@@ -2,7 +2,8 @@ using Distributions
 
 can_migrate(person, pars) = person.age > pars.minor_age
 
-mig_prob(person, pars) = pars.mig_prob
+mig_prob(person, pars) = person.home.resources < 0 ?
+	person.dens_dispersal^3 : person.dispersal^3
 
 function migrate!(person, world, pars)
 	new_pos = find_new_home(person, world, pars)
@@ -48,7 +49,7 @@ function search_point(pos, angle, world, pars)
 	sz = size(world.quality)
 	
 	bresenham(pos[2], pos[1], end_point[2], end_point[1]) do x,y
-		if y < 0 || x < 0 || y > sz[1] || x > sz[2]
+		if y < 1 || x < 1 || y > sz[1] || x > sz[2]
 			return
 		end
 		

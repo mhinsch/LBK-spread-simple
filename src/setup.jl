@@ -6,7 +6,7 @@ function setup_world(pars)
 	wth_x, wth_y = ceil.(Int, (pars.lsc_x/pars.wth_zoom, pars.lsc_y/pars.wth_zoom))
 	hhc_x, hhc_y = ceil.(Int, (pars.lsc_x/hhc_zoom, pars.lsc_y/hhc_zoom))
 	world = World(
-		generate_suitability(pars),
+		generate_suitability2(pars),
 		zeros(pars.lsc_y, pars.lsc_x),
 		zeros(Bool, pars.lsc_y, pars.lsc_x),
 		zeros(wth_y, wth_x),
@@ -31,9 +31,14 @@ end
 
 
 function generate_suitability(pars)
-	rand(DiamondSquare(H=pars.lsc_ruggedness), (pars.lsc_x, pars.lsc_y))
+	rand(DiamondSquare(H=pars.lsc_ruggedness), (pars.lsc_x, pars.lsc_y)) .*
+		pars.lsc_range .+ pars.lsc_min
 end
 
+function generate_suitability2(pars)
+	rand(PerlinNoise(periods=(10,10), octaves=4), (pars.lsc_x, pars.lsc_y)) .*
+		pars.lsc_range .+ pars.lsc_min
+end
 
 function calc_quality!(world, pars)
 	dist = pars.qual_dist
@@ -66,14 +71,16 @@ function generate_population!(world, pars)
 	end
 end
 
+rnd_in_range(rng) = rand() * (rng[2]-rng[1]) + rng[1]
 
 function setup_population!(world, pars)
 	for person in world.pop
 		person.sex = rand(0:1)
 		# triangular age pyramid
 		person.age = min(rand() * 60, rand() * 60)
-		person.coop = rand()
-		person.dispersal = rand()
+		person.coop = rnd_in_range(pars.ini_coop)
+		person.dispersal = rnd_in_range(pars.ini_dispersal)
+		person.dens_dispersal = rnd_in_range(pars.ini_dens_dispersal)
 		person.culture = rand()
 	end
 end		

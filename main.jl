@@ -1,3 +1,7 @@
+include("main_util.jl")
+include("src/model.jl")
+include("analysis.jl")
+
 
 function setup_logs(data_fname)
     file = open(data_fname, "w")

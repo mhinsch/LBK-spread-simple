@@ -29,6 +29,7 @@ mutable struct Person
 	
 	coop :: Float64
 	dispersal :: Float64
+	dens_dispersal :: Float64
 	
 	culture :: Float64
 end
@@ -39,7 +40,7 @@ const UnknownHousehold = Household{Person}((0,0))
 
 Person() = Person(UnknownHousehold, true, 0.0,
 	nothing, [], [], [],
-	0.0, 0.0,
+	0.0, 0.0, 0.0,
 	0.0)
 	
 const UnknownPerson = Person()
@@ -101,11 +102,6 @@ end
 
 function weather!(world, pars)
 	rand!(world.weather, DiamondSquare(H=pars.wth_ruggedness))
-end
-
-
-function harvest(pos, world, pars)
-	world.lsc[pos...] * weather_at(pos, world, pars)
 end
 
 
