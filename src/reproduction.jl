@@ -11,7 +11,7 @@ function reproduce!(mother, father, world, pars)
 	
 	child = Person(mother.home, sex, 0.0, 
 		nothing, [mother, father], [], [mother, father],
-		mother.coop, mother.dispersal, mother.dens_dispersal,
+		copy(mother.tokens),
 		(copy(mother.auto_genes[rand(1:2)]), copy(father.auto_genes[rand(1:2)])),
 		(sex ? copy(mother.sex_gene) : copy(father.sex_gene)),
 		mother.culture)
@@ -77,7 +77,7 @@ function mutate_genes!(child, pars)
 end
 
 function mutate!(child, pars)
-	child.coop = limit(0.0, child.coop + rand(Normal(0.0, pars.d_mut)), 1.0)
-	child.dispersal = limit(0.0, child.dispersal + rand(Normal(0.0, pars.d_mut)), 1.0)
-	child.dens_dispersal = limit(0.0, child.dens_dispersal + rand(Normal(0.0, pars.d_mut)), 1.0)
+	for t in instances(Tokens)
+		set_token!(child, t, limit(0.0, token(child, t) + rand(Normal(0.0, pars.d_mut)), 1.0))
+	end
 end

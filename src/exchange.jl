@@ -12,9 +12,9 @@ function exchange!(household, world, pars)
 end
 
 function willing_to_exchange(donor, recip, pars)
-	coop = sum(m->m.coop, donor.members) / length(donor.members)
+	p_coop = sum(m->token(m, coop), donor.members) / length(donor.members)
 	
-	rand() < coop
+	rand() < p_coop
 end
 
 function perform_exchange!(hh, self, pars)

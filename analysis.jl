@@ -14,10 +14,10 @@ const MMA = MaxMinAcc{Float64}
     for p in world.pop
         @stat("married", CountAcc) <| (! is_single(p))
         @stat("single", CountAcc) <| (p.age > pars.minor_age && is_single(p))
-        @stat("coop", MVA) <| p.coop
-        @stat("dispersal", MVA) <| p.dispersal
-        @stat("ddispersal", MVA) <| p.dens_dispersal
-        @stat("mig", MVA) <| (1-(1-p.dispersal^3)^40)
+        @stat("coop", MVA) <| token(p, coop)
+        @stat("dispersal", MVA) <| token(p, dispersal)
+        @stat("ddispersal", MVA) <| token(p, dens_dispersal)
+        @stat("mig", MVA) <| (1-(1-token(p, dispersal)^3)^40)
     end
 end
 

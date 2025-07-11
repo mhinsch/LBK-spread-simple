@@ -16,6 +16,9 @@ function add_to_household!(hh, person)
 end
 
 
+@enum Tokens coop=1 dispersal dens_dispersal join_disp
+
+
 mutable struct Person
 	home :: Household{Person}
 	sex :: Bool
@@ -27,9 +30,7 @@ mutable struct Person
 	
 	contacts :: Vector{Person}
 	
-	coop :: Float64
-	dispersal :: Float64
-	dens_dispersal :: Float64
+	tokens :: Vector{Float64}
 	
 	auto_genes :: Tuple{BitVector, BitVector}
 	sex_gene :: BitVector
@@ -44,10 +45,15 @@ const UnknownHousehold = Household{Person}((0,0))
 
 Person() = Person(UnknownHousehold, true, 0.0,
 	nothing, [], [], [],
-	0.0, 0.0, 0.0,
+	zeros(length(instances(Tokens))),
 	([], []), [],
 	0.0)
 	
+
+token(person, t) = person.tokens[Int(t)]
+set_token!(person, t, v) = (person.tokens[Int(t)] = v)
+
+
 const UnknownPerson = Person()
 
 is_female(person) = person.sex

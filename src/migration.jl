@@ -3,7 +3,7 @@ using Distributions
 can_migrate(person, pars) = person.age > pars.minor_age
 
 mig_prob(person, pars) = person.home.resources < 0 ?
-	person.dens_dispersal^3 : person.dispersal^3
+	token(person, dens_dispersal)^3 : token(person, dispersal)^3
 
 function migrate!(person, world, pars)
 	new_pos = find_new_home(person, world, pars)
@@ -70,7 +70,7 @@ function search_point(pos, angle, world, pars)
 end
 
 
-wants_to_join(person, migrant, pars) = rand() < pars.join_prob
+wants_to_join(person, migrant, pars) = rand() < token(person, join_disp)^3
 
 
 function move_or_create_household!(person, new_pos, world, pars)

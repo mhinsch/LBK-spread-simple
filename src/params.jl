@@ -5,8 +5,12 @@
 	lsc_x :: Int = 1025
 	"landscape height"
 	lsc_y :: Int = 1025
+	"lanscape generation mode: 1 - diamond square, 2 - Perlin noise"
+	lsc_mode :: Int = 2
 	"ruggedness used during landscape generation"
-	lsc_ruggedness :: Float64 = 0.7
+	lsc_ds_ruggedness :: Float64 = 0.7
+	lsc_pn_periods :: Int = 10
+	lsc_pn_octaves :: Int = 4
 	"range of suitability"
 	lsc_range :: Float64 = 1.0
 	"minimum suitability"
@@ -23,6 +27,7 @@
 	"probability to spontaneously migrate (per year)"
 	ini_dispersal :: Vector{Float64} = [0.0, 0.0]
 	ini_dens_dispersal :: Vector{Float64} = [0.0, 0.0]
+	ini_join_disp :: Vector{Float64} = [0.0, 0.0]
 	ini_coop :: Vector{Float64} = [0.0, 1.0]
 	p_mut :: Float64 = 0.1
 	d_mut :: Float64 = 0.05
