@@ -5,10 +5,21 @@ function setup_world(pars)
 	hhc_zoom = 8
 	wth_x, wth_y = ceil.(Int, (pars.lsc_x/pars.wth_zoom, pars.lsc_y/pars.wth_zoom))
 	hhc_x, hhc_y = ceil.(Int, (pars.lsc_x/hhc_zoom, pars.lsc_y/hhc_zoom))
+	lsc =
+		if pars.lsc_mode == 1
+			generate_suitability_ds(pars)
+		elseif pars.lsc_mode == 2
+			generate_suitability_pn(pars)
+		elseif pars.lsc_mode == 3
+			generate_suitability_hg(pars)
+		elseif pars.lsc_mode == 4
+			generate_suitability_vo(pars)
+		else
+			error("unknown lsc mode")
+		end
+		
 	world = World(
-		(pars.lsc_mode == 1 ?
-			generate_suitability_ds(pars) :
-			generate_suitability_pn(pars)),
+		lsc,
 		zeros(pars.lsc_y, pars.lsc_x),
 		zeros(Bool, pars.lsc_y, pars.lsc_x),
 		zeros(wth_y, wth_x),
@@ -38,10 +49,17 @@ function generate_suitability_ds(pars)
 end
 
 function generate_suitability_pn(pars)
-	rand(
-		PerlinNoise(periods=(pars.lsc_pn_periods, pars.lsc_pn_periods), pars.lsc_pn_octaves=4),
-			(pars.lsc_x, pars.lsc_y)) .*
+	(rand(PerlinNoise(periods=(pars.lsc_pn_periods, pars.lsc_pn_periods), octaves=pars.lsc_pn_octaves,
+			valley=:-), (pars.lsc_x, pars.lsc_y))) .*
 		pars.lsc_range .+ pars.lsc_min
+end
+
+function generate_suitability_hg(pars)
+	rand(pars.lsc_x, pars.lsc_y) .* pars.lsc_range .+ pars.lsc_min
+end
+	
+function generate_suitability_vo(pars)
+	rand(DiscreteVoronoi(pars.lsc_vo_n), (pars.lsc_x, pars.lsc_y)).^pars.lsc_vo_exp .* pars.lsc_range .+ pars.lsc_min
 end
 
 function calc_quality!(world, pars)

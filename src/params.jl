@@ -5,12 +5,14 @@
 	lsc_x :: Int = 1025
 	"landscape height"
 	lsc_y :: Int = 1025
-	"lanscape generation mode: 1 - diamond square, 2 - Perlin noise"
+	"lanscape generation mode: 1 - diamond square, 2 - Perlin noise, 3 - Uniform, 4 - Voronoi"
 	lsc_mode :: Int = 2
 	"ruggedness used during landscape generation"
 	lsc_ds_ruggedness :: Float64 = 0.7
 	lsc_pn_periods :: Int = 10
 	lsc_pn_octaves :: Int = 4
+	lsc_vo_n :: Int = 10000
+	lsc_vo_exp :: Float64 = 1.5
 	"range of suitability"
 	lsc_range :: Float64 = 1.0
 	"minimum suitability"

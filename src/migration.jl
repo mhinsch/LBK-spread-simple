@@ -29,15 +29,19 @@ function find_new_home(person, world, pars)
 	
 	# pick line roughly in direction and try to find good place
 	ptq = pos
+	ptqs = Tuple{Pos, Float64}[]
 	for i in 1:pars.n_searches
-		search_angle = angle + rand(Normal(0.0, i*pars.search_angle_s))
-		ptq = search_point(pos, angle, world, pars)
+		search_angle = angle + rand(Normal(0.0, pars.search_angle_s))
+		ptq, qual = search_point(pos, angle, world, pars)
 		if ptq != pos
-			break
+			push!(ptqs, (ptq, qual))
 		end
 	end
-	
-	ptq
+
+	if isempty(ptqs)
+		return pos
+	end
+	ptqs[findmax(p->p[2], ptqs)[2]][1]
 end
 
 
@@ -62,11 +66,11 @@ function search_point(pos, angle, world, pars)
 		nothing
 	end
 	if isempty(points)
-		return pos
+		return pos, 0
 	end
 
 	#return best point
-	points[findmax(p->p[2], points)[2]][1]
+	points[findmax(p->p[2], points)[2]]
 end
 
 
