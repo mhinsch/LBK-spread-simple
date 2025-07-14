@@ -44,7 +44,7 @@ end
 Cache2D{ELT}(sz::Tuple{Int, Int}, zoom::Int) where {ELT} = 
 	Cache2D{ELT}([ ELT[] for y in 1:sz[1], x in 1:sz[2]], zoom)
 	
-pos2cache_idx(cache, pos) = pos[1]÷cache.zoom + 1, pos[2]÷cache.zoom + 1
+pos2cache_idx(cache, pos) = (pos[1]+cache.zoom-1)÷cache.zoom, (pos[2]+cache.zoom-1)÷cache.zoom 
 	
 function add_to_cache!(cache, item, pos)
 	push!(cache.data[pos2cache_idx(cache, pos)...], item)

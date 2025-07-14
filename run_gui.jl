@@ -21,6 +21,8 @@ include("analysis.jl")
 
 
 using SimpleDirectMediaLayer.LibSDL2
+import Colors
+using Colors: distinguishable_colors, RGB
 
 push!(LOAD_PATH, pwd())
 
@@ -33,7 +35,7 @@ include("draw_gui.jl")
 
 ### run simulation with given setup and parameters
 
-function run(model, gui, graphs, logfile)
+function run(model, gui, graphs1, graphs2, graphs3, graphs4, logfile)
 	t = 1.0
 	last = 0
 
@@ -52,10 +54,18 @@ function run(model, gui, graphs, logfile)
 			#print_stats(logfile, model)
 			# this is suboptimal, as all these are calculated in print_stats as well
 			# solution forthcoming
-			add_value!(graphs[1], data.N)
-			#add_value!(graphs[2], count(ag -> ag.status == infected, model.pop))
-			#add_value!(graphs[3], count(ag -> ag.status == immune, model.pop))
-			#add_value!(graphs[4], count(ag -> ag.status == dead, model.pop))
+			add_value!(graphs1[1], data.N)
+			
+			add_value!(graphs2[1], data.coop.mean)
+
+			add_value!(graphs3[1], data.dispersal.mean)
+			add_value!(graphs3[2], data.ddispersal.mean)
+			add_value!(graphs3[3], data.join.mean)
+			add_value!(graphs3[4], data.mig.mean)
+			
+			add_value!(graphs4[1], data.hh_size.mean)
+			add_value!(graphs4[2], data.hh_size.max)
+			add_value!(graphs4[3], data.hh_res.mean)
 
 			t += 1
 
@@ -84,7 +94,7 @@ function run(model, gui, graphs, logfile)
 		end
 
 		# draw gui to video memory
-		draw(model, graphs, gui)
+		draw(model, graphs1, graphs2, graphs3, graphs4, gui)
 		# copy to screen
 		render!(gui)
 	end
@@ -121,14 +131,29 @@ const log_freq = args[:log_freq]
 const data_fname = args[:output]
 const log_file = setup_logs(data_fname)
 
-const gui = setup_Gui("SRM", 1025, 1025, 2, 1)
-const graphs = [Graph{Int}(green(255)), Graph{Int}(red(255)), Graph{Int}(blue(255)), Graph{Int}(WHITE)] 
+const gui = setup_Gui("SRM", 2000, 1000, (1:2, 1:2), (3,1), (3,2), (4,1), (4,2))
+
+const rawcolors = distinguishable_colors(8, [RGB(1,1,1), RGB(0,0,0)], dropseed=true)
+const colors = map(c->(Colors.red(c), Colors.green(c), Colors.blue(c)).*255, rawcolors)
+
+const graphs1 = [Graph{Int}(rgb(colors[1]...), "N")] 
+
+const graphs2 = [Graph{Float64}(rgb(colors[1]...), "coop")] 
+
+const graphs3 = [
+	Graph{Float64}(rgb(colors[1]...), "mig"), 
+	Graph{Float64}(rgb(colors[2]...), "dens mig"), 
+	Graph{Float64}(rgb(colors[3]...), "join mig"), 
+	Graph{Float64}(rgb(colors[4]...), "lt mig")] 
 
 
-
+const graphs4 = [
+	Graph{Float64}(rgb(colors[1]...), "hh size"), 
+	Graph{Float64}(rgb(colors[2]...), "max hh size"), 
+	Graph{Float64}(rgb(colors[3]...), "hh res")] 
 ## run
 
-run(model, gui, graphs, log_file)
+run(model, gui, graphs1, graphs2, graphs3, graphs4, log_file)
 
 
 

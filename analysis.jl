@@ -17,7 +17,13 @@ const MMA = MaxMinAcc{Float64}
         @stat("coop", MVA) <| token(p, coop)
         @stat("dispersal", MVA) <| token(p, dispersal)
         @stat("ddispersal", MVA) <| token(p, dens_dispersal)
+        @stat("join", MVA) <| token(p, join_disp)
         @stat("mig", MVA) <| (1-(1-token(p, dispersal)^3)^40)
+    end
+
+    for hh in world.households
+        @stat("hh_size", MVA, MMA) <| 1.0*length(hh.members)
+        @stat("hh_res", MVA) <| hh.resources
     end
 end
 

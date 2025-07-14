@@ -17,6 +17,12 @@ function setup_world(pars)
 		else
 			error("unknown lsc mode")
 		end
+
+	if pars.lsc_invert
+		lsc .= 1.0 .- lsc
+	end
+
+	lsc .= lsc .* pars.lsc_range .+ pars.lsc_min
 		
 	world = World(
 		lsc,
@@ -44,22 +50,21 @@ end
 
 
 function generate_suitability_ds(pars)
-	rand(DiamondSquare(H=pars.lsc_ds_ruggedness), (pars.lsc_x, pars.lsc_y)) .*
-		pars.lsc_range .+ pars.lsc_min
+	lsc = rand(DiamondSquare(H=pars.lsc_ds_ruggedness), (pars.lsc_x, pars.lsc_y))
 end
 
 function generate_suitability_pn(pars)
-	(rand(PerlinNoise(periods=(pars.lsc_pn_periods, pars.lsc_pn_periods), octaves=pars.lsc_pn_octaves,
-			valley=:-), (pars.lsc_x, pars.lsc_y))) .*
-		pars.lsc_range .+ pars.lsc_min
+	rand(PerlinNoise(periods=(pars.lsc_pn_periods, pars.lsc_pn_periods), octaves=pars.lsc_pn_octaves,
+			valley=Symbol(pars.lsc_pn_valley)), (pars.lsc_x, pars.lsc_y)) 
 end
 
+
 function generate_suitability_hg(pars)
-	rand(pars.lsc_x, pars.lsc_y) .* pars.lsc_range .+ pars.lsc_min
+	rand(pars.lsc_x, pars.lsc_y) 
 end
 	
 function generate_suitability_vo(pars)
-	rand(DiscreteVoronoi(pars.lsc_vo_n), (pars.lsc_x, pars.lsc_y)).^pars.lsc_vo_exp .* pars.lsc_range .+ pars.lsc_min
+	rand(DiscreteVoronoi(pars.lsc_vo_n), (pars.lsc_x, pars.lsc_y)).^pars.lsc_vo_exp 
 end
 
 function calc_quality!(world, pars)

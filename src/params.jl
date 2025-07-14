@@ -11,8 +11,10 @@
 	lsc_ds_ruggedness :: Float64 = 0.7
 	lsc_pn_periods :: Int = 10
 	lsc_pn_octaves :: Int = 4
+	lsc_pn_valley :: String = "v"
 	lsc_vo_n :: Int = 10000
 	lsc_vo_exp :: Float64 = 1.5
+	lsc_invert :: Bool = false
 	"range of suitability"
 	lsc_range :: Float64 = 1.0
 	"minimum suitability"

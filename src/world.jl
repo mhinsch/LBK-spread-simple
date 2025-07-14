@@ -73,7 +73,7 @@ mutable struct World
 	pop :: Vector{Person}
 end
 
-weather_at(pos, world, pars) = world.weather[pos[1]÷pars.wth_zoom+1, pos[2]÷pars.wth_zoom+1]
+weather_at(pos, world, pars) = world.weather[(pos[1]+1)÷pars.wth_zoom, (pos[2]+1)÷pars.wth_zoom]
 
 
 function add_household!(world, hh)

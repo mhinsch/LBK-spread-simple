@@ -40,13 +40,13 @@ function draw_world(canvas, model)
 
 		q = limit(0.0, lsc[y,x], 1.0)
 
-		col = rgb(q*255, q*255, q*255)
+		col = rgb(q*155, q*155, q*155)
 		put(canvas, p[2], p[1], col)
 	end
 
 	for hh in world.households
 		x, y = floor.(Int, (hh.pos[2]/zoomx, hh.pos[1]/zoomy))
-		circle_fill(canvas, x, y, 2, rgb(200, 0, 0), true)
+		circle_fill(canvas, x, y, 1, rgb(250, 0, 0), true)
 		for f in hh.fields 
 			q = limit(0.0, harvest(f[1], world, pars), 1.0)
 			col = rgb((1-q)*255, q*255, 0)
@@ -59,13 +59,26 @@ function draw_world(canvas, model)
 end
 
 # draw both panels to video memory
-function draw(model, graphs, gui)
-	clear!(gui.canvas)
-	draw_world(gui.canvas, model)
-	SimpleGui.update!(gui.panels[1,1], gui.canvas)
+function draw(model, graphs1, graphs2, graphs3, graphs4, gui)
+	bg = rgb(100, 100, 100)
+	redraw_at!(gui, 1, bg) do canvas
+		draw_world(canvas, model)
+	end
 
-	clear!(gui.canvas)
-	draw_graph(gui.canvas, graphs)
-	SimpleGui.update!(gui.panels[2, 1], gui.canvas)
+	redraw_at!(gui, 2, bg) do canvas
+		draw_graph(canvas, graphs1)
+	end
+
+	redraw_at!(gui, 3, bg) do canvas
+		draw_graph(canvas, graphs2)
+	end
+
+	redraw_at!(gui, 4, bg) do canvas
+		draw_graph(canvas, graphs3)
+	end
+	
+	redraw_at!(gui, 5, bg) do canvas
+		draw_graph(canvas, graphs4)
+	end
 end
 
